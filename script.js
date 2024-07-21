@@ -348,8 +348,11 @@ class MainScene extends Phaser.Scene {
 
     update() {
         if (gameOver) {
-            location.reload();
-
+            this.add.text(250, 250, 'Game Over', {backgroundColor:'red', fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif', fontSize: 100 }, );  
+            cursors = this.input.keyboard.createCursorKeys();
+            if(cursors.space.isDown){
+                location.reload();
+            }
             return;
         }
 
