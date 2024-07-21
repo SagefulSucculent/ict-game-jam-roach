@@ -269,7 +269,7 @@ class MainScene extends Phaser.Scene {
         });
 
         this.timer = this.time.addEvent({
-            delay: 900,                // ms
+            delay: 8000,                // ms
             callback: () => spiderSpawner(this),
             //args: [],
             callbackScope: this,
