@@ -9,12 +9,46 @@ var cursors;
 var gameOver = false;
 var timer;
 
+const findAngle = (mousePlayerDiff, player) => {
+    let angle = Phaser.Math.Angle.Between(0, 0, mousePlayerDiff.x, mousePlayerDiff.y);
+    let degree = Phaser.Math.RadToDeg(angle); 
+    handleAnimation(degree, player)
+}
+
+const handleAnimation = (angle, player) => {
+        // Define the angle ranges for each direction
+        if (angle >= -45 && angle < 45) {
+            player.anims.play('left', true);
+
+           // console.log('left');
+            // Right animation
+        } else if (angle >= 45 && angle < 135) {
+            player.anims.play('up', true);
+
+            //console.log('up');
+            // Down animation
+        } else if (angle >= 135 || angle < -135) {
+            player.anims.play('right', true);
+
+            //console.log('right');
+            // Left animation
+        } else if (angle >= -135 && angle < -45) {
+            player.anims.play('down', true);
+
+            //console.log('down');
+            // Up animation
+        }
+}
+
 const moveSystem = (player) => {
     let player_pos = new Phaser.Math.Vector2(player.x,player.y)
     let spider_pos = new Phaser.Math.Vector2(spider.x,spider.y)
     let mousePlayerDiff = player_pos.clone()
 
     mousePlayerDiff.subtract(game.input.mousePointer.position)
+    findAngle(mousePlayerDiff, player);
+
+
     let mpd_mag = mousePlayerDiff.length()
     mousePlayerDiff.normalize()
 
@@ -119,14 +153,16 @@ class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('sky', 'assets/sky.png');
-        this.load.image('roach', 'assets/roach_32.png')
+        this.load.image('sky', 'assets/background.png');
+        //this.load.image('roach', 'assets/roach_32.png')
         this.load.image('spider', 'assets/spider_64.png')
+        this.load.spritesheet("roach", "assets/cockroach-spritesheet.png", 
+            {frameWidth: 64, frameHeight: 64});
 
         ///////scenery
         this.load.image('can-i', 'assets/soda-can.png');
         this.load.image('leaf_s-m', 'assets/maple-leaf.png');
-        this.load.image('leaf_l-m', 'assets/leaf_64.png');
+        this.load.image('leaf_l-m', 'assets/green-leaf.png');
         this.load.image('rock-i', 'assets/rock_48.png');
         this.load.image('stone-i', 'assets/stone_96.png');
 
@@ -162,8 +198,32 @@ class MainScene extends Phaser.Scene {
 
         spiderRadius = this.graphics.strokeCircle(a.x, a.y, radius);
 
-        player = this.physics.add.image(100, 450, 'roach');
+        player = this.physics.add.sprite(64, 64, 'roach');
         player.setCollideWorldBounds(true);
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('roach', { start: 2, end: 3 }),
+            frameRate: 10,
+            repeat: -1
+        });        
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('roach', { start: 0, end: 1 }),
+            frameRate: 10,
+            repeat: -1
+        });        
+        this.anims.create({
+            key: 'up',
+            frames: this.anims.generateFrameNumbers('roach', { start: 4, end: 5 }),
+            frameRate: 10,
+            repeat: -1
+        });        
+        this.anims.create({
+            key: 'down',
+            frames: this.anims.generateFrameNumbers('roach', { start: 6, end: 7 }),
+            frameRate: 10,
+            repeat: -1
+        });
         playerHealth = new HealthBar(this,-36,-43)
 
 
@@ -206,8 +266,8 @@ class MainScene extends Phaser.Scene {
 }
 var config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: 900,
+    height: 800,
     physics: {
         default: 'arcade',
         arcade: {
