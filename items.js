@@ -12,7 +12,7 @@ class Items {
     }
     
     createNewItem() {
-        console.log('ctx', this.ctx)
+        // console.log('ctx', this.ctx)
         const mapLocation = this.getRandCoord();
         const itemName = this.getRandomName();
         let newItem = this.ctx.physics.add.image(mapLocation.x, mapLocation.y, itemName);

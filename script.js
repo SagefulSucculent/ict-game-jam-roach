@@ -5,6 +5,7 @@ var player;
 var playerHealth;
 var spider;
 var spiderRadius;
+var spiderBuffer = [];
 var cursors;
 var gameOver = false;
 var timer;
@@ -69,6 +70,26 @@ const moveSystem = (player) => {
         spider.setVelocityX(playerSpiderDiff.x * spider_speed);
         spider.setVelocityY(playerSpiderDiff.y * spider_speed); 
     }
+
+
+    spiderBuffer.forEach(Spid => {
+        let sb0_pos = Spid.getPos()
+        let psb0diff = player_pos.clone()
+        psb0diff.subtract(sb0_pos)
+        let sb0_mag = psb0diff.length()
+        psb0diff.normalize()
+        let sb0_speed = sb0_mag * Spid.speed
+        if(sb0_mag < Spid.RadiusSize)
+            {
+                Spid.image.setVelocityX(psb0diff.x * sb0_speed);
+                Spid.image.setVelocityY(psb0diff.y * sb0_speed); 
+            }
+    })
+
+
+
+
+
 }
 
 
@@ -83,6 +104,70 @@ const spawnItem = (ctx) => {
     })
     ctx.items.push(newItem);
 
+}
+
+
+class Spider {
+    constructor(image, radius, RadiusColor = 0xffff00, RadiusSize = 128, speed = 2.4, damage = 1) {
+        this.RadiusColor = RadiusColor
+        this.RadiusSize = RadiusSize
+        this.speed = speed
+        this.damage = damage
+        this.image = image
+        this.radius = radius
+    }
+
+    update() {
+        this.radius.x = this.image.x
+        this.radius.y = this.image.y
+    }
+
+    getPos() {
+        return new Phaser.Math.Vector2(this.image.x,this.image.y)
+    }
+}
+
+
+const RandSpiderProps = () => {
+    /////// color                       radius size            speed                   damage
+    return [0xffffff * Math.random(), Math.random()* 256 + 32, Math.random()*2.9+.2, 2*Math.random() ]
+}
+
+const spiderSpawner = (ctx) => {
+    /////start spider
+
+
+    let randomSpiderProps = RandSpiderProps()
+    ctx.graphics = ctx.add.graphics();
+
+    // const color = 0xffff00;
+    const color = randomSpiderProps[0];
+
+    const thickness = 2;
+    const alpha = 1;
+
+    ctx.graphics.lineStyle(thickness, color, alpha);
+
+    const a = new Phaser.Geom.Point(0, 0);
+    const radius = randomSpiderProps[1];
+
+    let l_spiderRadius = ctx.graphics.strokeCircle(a.x, a.y, radius);
+
+    // let l_spider_pos = Phaser.Math.Vector2(800 * Math.random(), 600 * Math.random())
+    let l_spider = ctx.physics.add.image(game.config.width * Math.random(), game.config.height, 'spider');
+    l_spider.setCollideWorldBounds(true);
+    ctx.physics.add.collider(
+        player,
+        l_spider,
+        null,
+        (pl, sp) => {
+            playerHealth.value = (playerHealth.value - randomSpiderProps[3])
+            playerHealth.draw()
+            if (playerHealth.value < 0) { gameOver = true; }
+        }
+    )
+
+    spiderBuffer.push(new Spider(l_spider, l_spiderRadius,randomSpiderProps[0],randomSpiderProps[1],randomSpiderProps[2],randomSpiderProps[3]))
 }
 
 
@@ -182,9 +267,20 @@ class MainScene extends Phaser.Scene {
             callbackScope: this,
             loop: true
         });
+
+        this.timer = this.time.addEvent({
+            delay: 8000,                // ms
+            callback: () => spiderSpawner(this),
+            //args: [],
+            callbackScope: this,
+            loop: true
+        });
+
+
         this.add.image(400, 300, 'sky');
 
 
+        /////start spider
         this.graphics = this.add.graphics();
 
         const color = 0xffff00;
@@ -240,6 +336,9 @@ class MainScene extends Phaser.Scene {
             }
         )
 
+
+        // spiderSpawner(this)
+
         // this.physics.add.collider(player, spider);
 
         //  Input Events
@@ -261,6 +360,12 @@ class MainScene extends Phaser.Scene {
         spiderRadius.y = spider.y
         playerHealth.bar.x = player.x
         playerHealth.bar.y = player.y
+
+
+        // spiderBuffer[0].update()
+        spiderBuffer.forEach( Spid => {
+            Spid.update()
+        })
 
         moveSystem(player)
 
