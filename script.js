@@ -154,7 +154,7 @@ const spiderSpawner = (ctx) => {
     let l_spiderRadius = ctx.graphics.strokeCircle(a.x, a.y, radius);
 
     // let l_spider_pos = Phaser.Math.Vector2(800 * Math.random(), 600 * Math.random())
-    let l_spider = ctx.physics.add.image(game.config.width * Math.random(), game.config.height, 'spider');
+    let l_spider = ctx.physics.add.image(game.config.width * Math.random(),Math.random() * game.config.height, 'spider');
     l_spider.setCollideWorldBounds(true);
     ctx.physics.add.collider(
         player,
@@ -348,6 +348,8 @@ class MainScene extends Phaser.Scene {
 
     update() {
         if (gameOver) {
+            location.reload();
+
             return;
         }
 
