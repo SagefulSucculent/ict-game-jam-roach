@@ -6,13 +6,13 @@ var player;
 var spider;
 var cursors;
 var gameOver = false;
-
+var timer;
 
 
 const getRandCoord = (ctx) => {
     return new Phaser.Math.Vector2(800*Math.random(),600*Math.random())
 }
-var ItemNames = ['stone','rock','leaf_l','leaf_s','can']
+var ItemNames = ['stone-i','rock-i','leaf_l-m','leaf_s-m','can-i']
 var NumItems = 8
 
 const genItems = (ctx) => {
@@ -20,13 +20,13 @@ const genItems = (ctx) => {
     {
         let pos = getRandCoord()
         ctx.items.push(ctx.add.image(pos.x,pos.y, ItemNames[Math.floor(Math.random()*5)]))
-        
 
     }
 }
 
 
 const moveSystem = () => {
+
     if((game.loop.frame)%30 == 0)
     {
         player_pos = new Phaser.Math.Vector2(player.x,player.y)
@@ -48,6 +48,30 @@ const moveSystem = () => {
 
 }
 
+const createItem = (ctx) => {
+    const mapLocation = getRandCoord();
+    const itemName = ItemNames[Math.floor(Math.random()*5)]
+    let newItem = ctx.physics.add.image(mapLocation.x, mapLocation.y, itemName);
+    newItem.angle = 360 * Math.random();
+    newItem.setCollideWorldBounds(true);
+    if (itemName.slice(-1) === 'i'){
+        newItem.body.immovable = true;
+    } 
+        ctx.physics.add.collider(player, newItem);
+    
+    return newItem;
+}
+
+const spawnItem = (ctx) => {
+    console.log('item Placed');
+    const newItem = createItem(ctx);
+    ctx.items.forEach(item => {
+        ctx.physics.add.collider(item, newItem);
+    })
+    ctx.items.push(newItem);
+
+}
+
 class MainScene extends Phaser.Scene 
 {
     constructor ()
@@ -62,11 +86,11 @@ class MainScene extends Phaser.Scene
         this.load.image('spider','assets/spider_64.png')
 
         ///////scenery
-        this.load.image('can', 'assets/can_32.png');
-        this.load.image('leaf_s', 'assets/leaf_32.png');
-        this.load.image('leaf_l', 'assets/leaf_64.png');
-        this.load.image('rock', 'assets/rock_48.png');
-        this.load.image('stone', 'assets/stone_96.png');
+        this.load.image('can-i', 'assets/can_32.png');
+        this.load.image('leaf_s-m', 'assets/leaf_32.png');
+        this.load.image('leaf_l-m', 'assets/leaf_64.png');
+        this.load.image('rock-i', 'assets/rock_48.png');
+        this.load.image('stone-i', 'assets/stone_96.png');
 
 
         ////shader
@@ -78,16 +102,17 @@ class MainScene extends Phaser.Scene
 {
 
     this.items = []
-    
+    this.timer = this.time.addEvent({
+        delay: 2400,                // ms
+        callback: () => spawnItem(this),
+        //args: [],
+        callbackScope: this,
+        loop: true
+    });
+
     this.add.image(400, 300, 'sky');
-    genItems(this);
-    this.items.forEach(i=>{
-        i.angle = 360 * Math.random()
-        console.log(i.angle)      
-    })
 
     player = this.physics.add.image(100, 450, 'roach');
-    player.setBounce(0.2);
     player.setCollideWorldBounds(true);
 
     spider = this.physics.add.image(300, 150, 'spider');
