@@ -47,8 +47,8 @@ class MainScene extends Phaser.Scene {
         this.load.image('spider', 'assets/spider_64.png')
 
         ///////scenery
-        this.load.image('can-i', 'assets/can_32.png');
-        this.load.image('leaf_s-m', 'assets/leaf_32.png');
+        this.load.image('can-i', 'assets/soda-can.png');
+        this.load.image('leaf_s-m', 'assets/maple-leaf.png');
         this.load.image('leaf_l-m', 'assets/leaf_64.png');
         this.load.image('rock-i', 'assets/rock_48.png');
         this.load.image('stone-i', 'assets/stone_96.png');
